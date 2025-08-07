@@ -115,7 +115,7 @@ def BestFitDiffuseFluxKM3NeT(xs,lt,br):
         pred_NT_K3 =    K3.interp_aeff_NT.ev(xs,lt)*K3.LiveTime
     elif K3.count_cascades:  # KM3NeT looks for cascades but the primary vertex is not detectable
         pred_NT_K3 =    K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
-    else:  # KM3NeT does not look for cascades or the primary vertex is not detectable
+    else:  # KM3NeT does not look for cascades 
         pred_NT_K3 = br*K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
     
     return K3.number_of_muons/(pred_muons_K3+pred_NT_K3)/pars.DiffuseNorm
@@ -132,7 +132,7 @@ def BestFitDiffuseFluxA3(xs,lt,br):
         pred_NT_K3 =    K3.interp_aeff_NT.ev(xs,lt)*K3.LiveTime
     elif K3.count_cascades:  # KM3NeT looks for cascades but the primary vertex is not detectable
         pred_NT_K3 =    K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
-    else:  # KM3NeT does not look for cascades or the primary vertex is not detectable
+    else:  # KM3NeT does not look for cascades 
         pred_NT_K3 = br*K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
     
     return (AN.number_of_AAEs+K3.number_of_muons)/(pred_events_AN+pred_muons_K3+pred_NT_K3)/pars.DiffuseNorm
@@ -144,7 +144,10 @@ def BestFitDiffuseFluxAI(xs,lt,br):
     pred_events_AN = AN.interp_aeff_tot.ev(xs,lt)*AN.LiveTime*(1.-br)
 
     pred_muons_IC = IC.interp_aeff_mu.ev(xs,lt)*IC.LiveTime*br
-    pred_NT_IC    = IC.interp_aeff_NT.ev(xs,lt)*IC.LiveTime # all detectable
+    if pars.N_detectable:
+        pred_NT_IC     = IC.interp_aeff_NT.ev(xs,lt)*IC.LiveTime
+    else:
+        pred_NT_IC     = IC.interp_aeff_T.ev(xs,lt)*IC.LiveTime 
 
     return (AN.number_of_AAEs+K3.number_of_muons)/(pred_events_AN+pred_muons_IC+pred_NT_IC)/pars.DiffuseNorm
 
@@ -157,11 +160,15 @@ def BestFitDiffuseFluxI3(xs,lt,br):
         pred_NT_K3 =    K3.interp_aeff_NT.ev(xs,lt)*K3.LiveTime
     elif K3.count_cascades:  # KM3NeT looks for cascades but the primary vertex is not detectable
         pred_NT_K3 =    K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
-    else:  # KM3NeT does not look for cascades or the primary vertex is not detectable
+    else:  # KM3NeT does not look for cascades 
         pred_NT_K3 = br*K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
 
-    pred_muons_IC  = K3.interp_aeff_mu.ev(xs,lt)*IC.LiveTime*br
-    pred_NT_IC     = K3.interp_aeff_NT.ev(xs,lt)*IC.LiveTime
+    pred_muons_IC  = IC.interp_aeff_mu.ev(xs,lt)*IC.LiveTime*br
+    if pars.N_detectable:
+        pred_NT_IC     = IC.interp_aeff_NT.ev(xs,lt)*IC.LiveTime
+    else:
+        pred_NT_IC     = IC.interp_aeff_T.ev(xs,lt)*IC.LiveTime
+    
     den = pred_muons_K3+pred_NT_K3+pred_NT_IC+pred_muons_IC
 
     return K3.number_of_muons/den/pars.DiffuseNorm 
@@ -178,11 +185,15 @@ def BestFitDiffuseFluxAI3(xs,lt,br):
         pred_NT_K3 =    K3.interp_aeff_NT.ev(xs,lt)*K3.LiveTime
     elif K3.count_cascades:  # KM3NeT looks for cascades but the primary vertex is not detectable
         pred_NT_K3 =    K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
-    else:  # KM3NeT does not look for cascades or the primary vertex is not detectable
+    else:  # KM3NeT does not look for cascades
         pred_NT_K3 = br*K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
 
-    pred_muons_IC  = K3.interp_aeff_mu.ev(xs,lt)*IC.LiveTime*br
-    pred_NT_IC     = K3.interp_aeff_NT.ev(xs,lt)*IC.LiveTime
+    pred_muons_IC  = IC.interp_aeff_mu.ev(xs,lt)*IC.LiveTime*br
+    if pars.N_detectable:
+        pred_NT_IC     = IC.interp_aeff_NT.ev(xs,lt)*IC.LiveTime
+    else:
+        pred_NT_IC     = IC.interp_aeff_T.ev(xs,lt)*IC.LiveTime
+
     den = pred_events_AN+pred_muons_K3+pred_NT_K3+pred_NT_IC+pred_muons_IC
 
     return (AN.number_of_AAEs+K3.number_of_muons)/den/pars.DiffuseNorm # this is the differential flux (over 4pi)
@@ -222,18 +233,13 @@ def BestFitBranchingRatioNoPhiA3(xs,lt):
 
     pred_muons_K3  = K3.interp_aeff_mu.ev(xs,lt)*K3.LiveTime
 
-    # if K3.count_cascades and pars.N_detectable: # KM3NeT looks for cascades and they are detectable
-    #     pred_NT_K3 =    K3.interp_aeff_NT.ev(xs,lt)*K3.LiveTime
-    # elif K3.count_cascades:  # KM3NeT looks for cascades but the primary vertex is not detectable
-    #     pred_NT_K3 =    K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
-    # else:  # KM3NeT does not look for cascades or the primary vertex is not detectable
-    #     pred_NT_K3 = br*K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
-
-    # I need to check this!
-    if K3.count_cascades:
+    if K3.count_cascades and pars.N_detectable: # KM3NeT looks for cascades and they are detectable
         pred_NT_K3     = K3.interp_aeff_NT.ev(xs,lt)*K3.LiveTime
-        return 1./(1.+AN.number_of_AAEs/K3.number_of_muons*pred_muons_K3/(pred_NT_K3+pred_events_AN))
-    else:
+        return 1./(1.+AN.number_of_AAEs/K3.number_of_muons*(pred_muons_K3+pred_NT_K3)/(pred_NT_K3+pred_events_AN))
+    elif K3.count_cascades: # KM3NeT looks for cascades but the primary vertex is not detectable
+        pred_T_K3     = K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
+        return 1./(1.+AN.number_of_AAEs/K3.number_of_muons*(pred_muons_K3+pred_T_K3)/(pred_T_K3+pred_events_AN))
+    else: # KM3NeT does not look for cascades 
         pred_T_K3     = K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
         return 1./(1.+AN.number_of_AAEs/K3.number_of_muons*(pred_muons_K3+pred_T_K3)/pred_events_AN)
 
@@ -242,22 +248,32 @@ def BestFitBranchingRatioNoPhiAI3(xs,lt):
     Returns the best-fit branching ratio (br) for IceCube+KM3NeT+ANITA.
     phi is already marginalized.
     """
+    # ANITA
     pred_events_AN = AN.interp_aeff_tot.ev(xs,lt)*AN.LiveTime
 
-    pred_muons_IC  = K3.interp_aeff_mu.ev(xs,lt)*IC.LiveTime
-    pred_NT_IC     = K3.interp_aeff_NT.ev(xs,lt)*IC.LiveTime
+    # IceCube
+    pred_muons_IC  = IC.interp_aeff_mu.ev(xs,lt)*IC.LiveTime
+    if pars.N_detectable:
+        pred_NT_IC = IC.interp_aeff_NT.ev(xs,lt)*IC.LiveTime
+    else:
+        pred_NT_IC = IC.interp_aeff_T.ev(xs,lt)*IC.LiveTime
 
+    # KM3NeT
     pred_muons_K3  = K3.interp_aeff_mu.ev(xs,lt)*K3.LiveTime
 
-    if K3.count_cascades:
+    if K3.count_cascades and pars.N_detectable: # KM3NeT looks for cascades and they are detectable
         pred_NT_K3     = K3.interp_aeff_NT.ev(xs,lt)*K3.LiveTime
-        num = pred_muons_K3+pred_NT_K3+pred_muons_IC+pred_NT_IC
+        num = pred_muons_K3+pred_NT_K3+pred_NT_IC+pred_muons_IC
         den = pred_events_AN+pred_NT_K3+pred_NT_IC
-    else:
-        pred_T_K3 = K3.interp_aeff_NT.ev(xs,lt)*K3.LiveTime
-        num = pred_muons_K3+pred_T_K3+pred_muons_IC+pred_NT_IC
+    elif K3.count_cascades: # KM3NeT looks for cascades but the primary vertex is not detectable
+        pred_T_K3     = K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
+        num = pred_muons_K3+pred_T_K3+pred_NT_IC+pred_muons_IC
+        den = pred_events_AN+pred_T_K3+ pred_NT_IC
+    else: # KM3NeT does not look for cascades 
+        pred_T_K3 = K3.interp_aeff_T.ev(xs,lt)*K3.LiveTime
+        num = pred_muons_K3+pred_T_K3+pred_NT_IC+pred_muons_IC
         den = pred_events_AN+pred_NT_IC
-        
+
     return 1./(1.+AN.number_of_AAEs/K3.number_of_muons*num/den)
 
 
