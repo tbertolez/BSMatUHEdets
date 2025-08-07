@@ -307,7 +307,7 @@ cpdef double ProbMuon_dmin_AbsorptionT(double [:,:] lay, double eini, double xs,
     m = n+1
     for i in range(n):
         x0, x1, dx, rho = lay[n-i-1] # since dmu is usually small, the layer will be one of the last ones, let's begin searching there
-        if ((x0 < d-dmin) and (x1 > d-dmin)):
+        if ((x0 <= d-dmin) and (x1 > d-dmin)):
             m = n-i-1 # m marks the layer where the muon must be created
             break
     if m == n+1:
@@ -499,7 +499,7 @@ cpdef double ProbMuon_dmin(double [:,:] lay, double eini, double xs, double lt, 
 
 cdef double ProbMuonAtd_NoAbs(double[:,:] lay, double dmu, double xs, double lt):
     # Probability of a muon being created at a distance dmu from the detector, with T not absorbed
-    cdef double ctau, rhow, rhor, lam, dmu, d, prob, x0, x1, dx, rho, term
+    cdef double ctau, rhow, rhor, lam, d, prob, x0, x1, dx, rho, term
     cdef int n = lay.shape[0]
     cdef double[:] prods_pre = np.empty(n, dtype=np.float64)
     cdef int i
@@ -543,7 +543,7 @@ cdef double ProbMuonAtd_NoAbs(double[:,:] lay, double dmu, double xs, double lt)
 
 cdef double ProbMuonAtd_TAbsorption(double[:,:] lay, double dmu, double xs, double lt):
     # Probability of a muon being created at a distance dmu from the detector, with T can absorbed
-    cdef double ctau, rhow, rhor, lam, dmu, d, x0, x1, dx, rho, termA, termB, prod_pre
+    cdef double ctau, rhow, rhor, lam, d, x0, x1, dx, rho, termA, termB, prod_pre
     cdef int n = lay.shape[0]
     cdef double[:, :] prods_mid = np.ones((n, n), dtype=np.float64)
     cdef int i, j, m, k
@@ -565,7 +565,7 @@ cdef double ProbMuonAtd_TAbsorption(double[:,:] lay, double dmu, double xs, doub
     m = n+1
     for i in range(n):
         x0, x1, dx, rho = lay[n-i-1] # since dmu is usually small, the layer will be one of the last ones, let's begin searching there
-        if ((x0 < d-dmu) and (x1 > d-dmu)):
+        if ((x0 <= d-dmu) and (x1 > d-dmu)):
             m = n-i-1 # m marks the layer where the muon must be created
             break
     if m == n+1:
@@ -602,7 +602,7 @@ cdef double ProbMuonAtd_TAbsorption(double[:,:] lay, double dmu, double xs, doub
 cpdef double ProbMuonAtd(double [:,:] lay, double dmu, double xs, double lt, bint is_T_absorbed):
     # Probability of a muon being created at a distance dmu from the detector
     if is_T_absorbed:
-        return ProbMuonAtd_AbsorptionT(lay,dmu,xs,lt)
+        return ProbMuonAtd_TAbsorption(lay,dmu,xs,lt)
     else:
         return ProbMuonAtd_NoAbs(lay,dmu,xs,lt)
 
@@ -733,7 +733,7 @@ cdef double ProbMuon_AbsorptionT(double [:,:] lay, double efin, double einiN, do
     m = n+1
     for i in range(n):
         x0, x1, dx, rho = lay[n-i-1] # since dmu is usually small, the layer will be one of the last ones, let's begin searching there
-        if ((x0 < d-dmu) and (x1 > d-dmu)):
+        if ((x0 <= d-dmu) and (x1 > d-dmu)):
             m = n-i-1 # m marks the layer where the muon must be created
             break
     if m == n+1:

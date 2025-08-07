@@ -168,17 +168,17 @@ def EffectiveArea(angle,efin, xs,lt):
             EffectiveAreaT(   angle,efin,xs,lt) + 
             EffectiveAreaN(   angle,efin,xs,lt))
 
-def TotalEffectiveAreaMuon(xs,lt,eps=1e-2):
+def TotalEffectiveAreaMuon(xs,lt, thmin = MinZenAngle, thmax = MaxZenAngle, eps=1e-2):
     """
     Returns the total effective area to muons, all-sky integrated.
     """
     def fsmooth(elev):
         return np.sin(elev)*EffectiveAreaMuon(elev,xs,lt) 
-    intsmoo = 2*np.pi*integrate.quad(fsmooth, MinZenAngle,MaxZenAngle, epsrel = eps)[0]
+    intsmoo = 2*np.pi*integrate.quad(fsmooth, thmin, thmax, epsrel = eps)[0]
     return intsmoo
 
 
-def TotalEffectiveAreaN(xs,lt, eps = 1e-2):
+def TotalEffectiveAreaN(xs,lt, thmin = MinZenAngle, thmax = MaxZenAngle, eps = 1e-2):
     """
     Returns the total effective area to N, all-sky integrated.
     If our initial flux is a delta function in energies, we do not need an integration in energy (since initial and final energies are related by a delta)
@@ -186,26 +186,32 @@ def TotalEffectiveAreaN(xs,lt, eps = 1e-2):
     def fsmooth(elev):
         return np.sin(elev)*(EffectiveAreaN(elev,pars.EnergyDelta,xs,lt)+
                              EffectiveAreaN(elev,pars.EnergyDelta*pars.y_NtoT*pars.y_TtoN,xs,lt)) 
-    intsmoo = 2*np.pi*integrate.quad(fsmooth,MinZenAngle,MaxZenAngle,epsrel = eps)[0]
+    intsmoo = 2*np.pi*integrate.quad(fsmooth,thmin, thmax,epsrel = eps)[0]
     return intsmoo
 
-def TotalEffectiveAreaT(xs,lt, eps = 1e-2):
+def TotalEffectiveAreaT(xs,lt, thmin = MinZenAngle, thmax = MaxZenAngle, eps = 1e-2):
     """
     Returns the total effective area to T, all-sky integrated.
     If our initial flux is a delta function in energies, we do not need an integration in energy (since initial and final energies are related by a delta)
     """
     def fsmooth(elev):
         return np.sin(elev)*EffectiveAreaT(elev,pars.EnergyDelta*pars.y_NtoT,xs,lt)
-    intsmoo = 2*np.pi*integrate.quad(fsmooth,MinZenAngle,MaxZenAngle,epsrel = eps)[0]
+    intsmoo = 2*np.pi*integrate.quad(fsmooth,thmin,thmax,epsrel = eps)[0]
     return intsmoo
 
-def TotalEffectiveArea(xs,lt,br):
+def TotalEffectiveArea(xs,lt,br, thmin = MinZenAngle, thmax = MaxZenAngle, eps = 1e-2):
     """
     Returns the total effective area to all possible signals.
     Muons are only produced if T decays into a muon (given by br),
     while N/T scattering and T decay always produce a signal.
     """
-    return br*TotalEffectiveAreaMuon(xs,lt)+TotalEffectiveAreaN(xs,lt)+TotalEffectiveAreaT(xs,lt)
+    if br == 0:
+        return (TotalEffectiveAreaN(xs,lt, thmin, thmax, eps)+
+                TotalEffectiveAreaT(xs,lt, thmin, thmax, eps))
+    else:
+        return (br*TotalEffectiveAreaMuon(xs,lt, thmin, thmax, eps)+
+                TotalEffectiveAreaN(xs,lt, thmin, thmax, eps)+
+                TotalEffectiveAreaT(xs,lt, thmin, thmax, eps))
 
 
 # -----------------------------------------

@@ -1,0 +1,7 @@
+venv_UHE/
+build/
+*.so
+*.c
+*.pyc
+
+*/__pycache__/

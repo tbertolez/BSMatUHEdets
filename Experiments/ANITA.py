@@ -104,20 +104,20 @@ def Layers(th):
         lays = np.vstack((lays,lays))
     return lays
 
-def ProbN(th,xs,lt):
+def ProbN(th,efin,einiN,xs,lt):
     """ 
     Probability a particle N exits the Earth. 
     Check Parameters.py to activate/deactivate T absorption through pars.is_T_absorbed
     """
     lay = Layers(th)
-    return probs.ProbN(lay,xs,lt,pars.is_T_absorbed)
+    return probs.ProbN(lay,efin,einiN,xs,lt,pars.is_T_absorbed)
 
-def ProbT(th,xs,lt):
+def ProbT(th,efin,einiN,xs,lt):
     """
     Probability a particle T exits the Earth.
     """
     lay = Layers(th)
-    return probs.ProbT(lay,xs,lt,pars.is_T_absorbed)
+    return probs.ProbT(lay,efin,einiN,xs,lt,pars.is_T_absorbed)
 
 def DecayBeforeProbabilityT(lt, length):
     """
@@ -171,7 +171,7 @@ def GeometricArea_ExitProbT(angle,xs,lt,height = MeanHeight,
         return 0.
 
     area = GeometricArea(elv)
-    return ProbT(th,xs,lt)*area
+    return ProbT(th,pars.EnergyDelta*pars.y_NtoT,pars.EnergyDelta,xs,lt)*area
 
 
 def EffectiveAreaT(angle,xs,lt, height = MeanHeight, 
@@ -197,7 +197,7 @@ def EffectiveAreaT(angle,xs,lt, height = MeanHeight,
     T_int_contribution = 0.
     if pars.is_T_absorbed:
         n_tgt = NumberOfTargets(elv,height)
-        probT = ProbT(th, xs, lt)
+        probT = ProbT(th, pars.EnergyDelta*pars.y_NtoT, pars.EnergyDelta, xs, lt)
         T_int_contribution = n_tgt*xs*probT
 
     # ANITA efficiency from the trigger probability
@@ -236,7 +236,8 @@ def EffectiveAreaN(angle,xs,lt,height = MeanHeight,
         return 0.
 
     ptrig = TriggerProbability(elv)
-    probN = ProbN(th, xs, lt)
+    probN = (ProbN(th, pars.EnergyDelta, pars.EnergyDelta, xs, lt)+
+             ProbN(th, pars.y_NtoT*pars.y_TtoN*pars.EnergyDelta, pars.EnergyDelta, xs, lt))
     aeffN = probN*NumberOfTargets(elv,height)*xs*ptrig
 
     return aeffN
@@ -341,8 +342,7 @@ def DiffuseEvents(xs, lt, phi = 1/muns.km**2/muns.day,
 # effectives areas (see Calculators/EffectiveAreas.py), interpolating them from
 # a data file speeds up the computation of tests statistics.
 
-namefile = datadir+'ANITA/EffectiveAreas.dat'
-all_aeff_data = mfuns.get_data(datadir+'ANITA/EffectiveAreas.dat')
+namefile = datadir+'ANITA/EffectiveAreas_TAbsorption.dat'
 # First column is the total effective area, 
 # following columns are the effective area averaged at each of the AAEs.
 

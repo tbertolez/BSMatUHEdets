@@ -23,7 +23,7 @@ import numpy as np
 from scipy import integrate
 from scipy.interpolate import RectBivariateSpline
 
-plvars.add_style(homedir+"PlotData/paper.mplstyle")
+plvars.add_style(homedir+"PlotData/style.mplstyle")
 
 # ----------------------------------------- #
 #               PARAMETERS                  #
